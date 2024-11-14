@@ -147,4 +147,15 @@ def sccomp_glm_data_frame_counts(
         show_console=True
     )
 
-    return fit, data_for_model # keep outputing data_for_model for debugging at dev stage
+    output = {
+        'fit': fit,
+        'model_input': data_for_model,
+        'truncation_df2': data,
+        'sample': sample,
+        'cell_group': cell_group,
+        'count': count,
+        'formula_composition': formula_composition,
+        'formula_variability': formula_variability
+    }
+
+    return output
