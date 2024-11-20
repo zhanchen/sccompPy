@@ -75,6 +75,11 @@ def summary_to_tibble(fit, par, x, y = None, probs = (5, 25, 50, 75, 95)):
     split_cols = filtered_summary["variable"].apply(split_variable_name)
     split_df = pd.DataFrame(split_cols.tolist(), columns=["variable", x] + ([y] if y else []))
 
+    # Ensure x and y are integers
+    split_df[x] = split_df[x].astype(int)
+    if y:
+        split_df[y] = split_df[y].astype(int)
+
     filtered_summary = pd.concat([split_df, filtered_summary.drop(columns=['variable'])], axis=1)
 
     # Add missing columns if not present
@@ -204,24 +209,39 @@ def get_abundance_contrast_draws(
     # Apply contrasts if specified
     # develop this later, require an example of contrasts
     if contrasts:
-        draws = mutate_from_expr_list(draws, contrasts, ignore_errors = TRUE)
+        draws = mutate_from_expr_list(draws, contrasts, ignore_errors = True)
+
+    # Convergence diagnostics
+    convergence_df = summary_to_tibble(fit, "beta", "C", "M") 
 
     # Attach cell names
-    if y is not None:
-        cell_names = pd.Series(y.columns, name=cell_group)
-        cell_names.index += 1  # Adjust for 1-based indexing in R
-        draws = draws.merge(cell_names, left_on ='M', right_index=True, how='left')
-        draws = draws[[cell_group] + [col for col in draws.columns if col != cell_group]]
+    y = model_input.get("y", None)
+    
+    cell_names = pd.Series(y.columns, name=cell_group)
+    cell_names.index += 1  # Adjust for 1-based indexing in R
+    
+    draws = draws.merge(cell_names, left_on ='M', right_index=True, how='left')
+    draws = draws[[cell_group] + [col for col in draws.columns if col != cell_group]]
+
+    factor_names = pd.Series(beta_factor_of_interest, name="parameter")
+    factor_names.index += 1
+    
+    convergence_df = convergence_df.merge(cell_names, left_on ='M', right_index=True, how='left')
+    convergence_df = convergence_df.merge(factor_names, left_on ='C', right_index=True, how='left')
     
     # Check if no contrasts of interest; if so, return minimal output
     if len(draws.columns) <= 5:
         return draws[[cell_group, 'M']].drop_duplicates()
+     
+    if 'R_hat' in convergence_df.columns:
+        convergence_df.rename(columns={'R_hat': 'R_k_hat'}, inplace=True)
+    elif 'k_hat' in convergence_df.columns:
+        convergence_df.rename(columns={'k_hat': 'R_k_hat'}, inplace=True)
+    
+    # Attach convergence info and reformat
+    draws = draws.melt(id_vars=[cell_group, 'M', 'chain__', 'iter__', 'draw__'], var_name='parameter', value_name='value')
+    draws = draws.merge(convergence_df[[cell_group, 'parameter', 'N_Eff', 'R_k_hat']], on=[cell_group, 'parameter'], how='left')
 
-    # Convergence diagnostics
-    convergence_df = summary_to_tibble(fit, "beta", "C", "M")  # Assumes summary function exists
-    if 'Rhat' in convergence_df.columns:
-        convergence_df.rename(columns={'Rhat': 'R_k_hat'}, inplace=True)
-    elif 'khat' in convergence_df.columns:
-        convergence_df.rename(columns={'khat': 'R_k_hat'}, inplace=True)
+    return draws.sort_values('parameter')
 
 
