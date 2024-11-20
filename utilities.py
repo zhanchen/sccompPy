@@ -244,4 +244,73 @@ def get_abundance_contrast_draws(
 
     return draws.sort_values('parameter')
 
+def get_FDR(x):
+    """
+    Calculate the False Discovery Rate (FDR) for a series of values.
+
+    Parameters:
+        x (list or pd.Series): Input values.
+
+    Returns:
+        pd.Series: The calculated FDR values.
+    """
+    # Convert input to a DataFrame
+    df = pd.DataFrame({'value': x})
+    
+    # Sort by value
+    df = df.sort_values(by='value').reset_index()
+    
+    # Calculate cumulative mean (FDR)
+    df['FDR'] = df['value'].expanding().mean()
+    
+    # Restore original order
+    df = df.sort_values(by='index')
+    
+    return df['FDR'].values
+
+def draws_to_statistics(draws, false_positive_rate, test_composition_above_logit_fold_change, cell_group, prefix=""):
+    
+    """
+    Calculate summary statistics for draws.
+
+    Parameters:
+        draws (pd.DataFrame): The input DataFrame with draws.
+        false_positive_rate (float): False positive rate for confidence intervals.
+        test_composition_above_logit_fold_change (float): Threshold for determining significance.
+        cell_group (str): The column representing the cell group.
+        prefix (str): Prefix for the resulting column names.
+
+    Returns:
+        pd.DataFrame: The DataFrame with calculated statistics.
+    """
+    # Summarize the statistics
+    grouped = draws.groupby([cell_group, 'M', 'parameter'])
+
+    summary = grouped.apply(lambda group: pd.Series({
+        f"{prefix}lower": group["value"].quantile(false_positive_rate / 2),
+        f"{prefix}effect": group["value"].quantile(0.5),
+        f"{prefix}upper": group["value"].quantile(1 - (false_positive_rate / 2)),
+        f"{prefix}bigger_zero": (group["value"] > test_composition_above_logit_fold_change).sum(),
+        f"{prefix}smaller_zero": (group["value"] < -test_composition_above_logit_fold_change).sum(),
+        "R_k_hat": group["R_k_hat"].unique()[0] if "R_k_hat" in group else None,
+        "N_Eff": group["N_Eff"].unique()[0] if "N_Eff" in group else None,
+        "n": len(group)
+    })).reset_index()
+
+    # Calculate pH0
+    summary[f"{prefix}pH0"] = 1 - summary[[f"{prefix}bigger_zero", f"{prefix}smaller_zero"]].max(axis=1) / summary["n"]
+
+    # Calculate FDR for each parameter
+    summary["FDR"] = summary.groupby("parameter")[f"{prefix}pH0"].transform(lambda pH0: get_FDR(pH0))
+
+    # Select relevant columns
+    relevant_cols = [cell_group, "M", "parameter", f"{prefix}lower", f"{prefix}effect", f"{prefix}upper", f"{prefix}pH0", "FDR"]
+    if "N_Eff" in summary.columns:
+        relevant_cols.append("N_Eff")
+    if "R_k_hat" in summary.columns:
+        relevant_cols.append("R_k_hat")
+
+     # Return the result
+    return summary[relevant_cols]
+
 
