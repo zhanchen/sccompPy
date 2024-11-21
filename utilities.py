@@ -19,10 +19,10 @@ def draws_to_tibble_x_y(fit, par, x, y, number_of_draws = None):
     par_names = [var for var in fit.stan_variables().keys() if re.search(par, var)]
 
     # Extract draws for the specified parameter and convert to DataFrame format
-    draws_df = fit.draws_pd(['beta', 'chain__', 'iter__', 'draw__'])
+    draws_df = fit.draws_pd([par, 'chain__', 'iter__', 'draw__'])
 
     # Pivot longer to reshape the DataFrame, renaming and selecting relevant columns
-    draws_long = draws_df.melt(var_name="parameter", value_name="value", value_vars=[col for col in draws_df.columns if 'beta' in col], id_vars = ['chain__', 'iter__', 'draw__'])
+    draws_long = draws_df.melt(var_name="parameter", value_name="value", value_vars=[col for col in draws_df.columns if par in col], id_vars = ['chain__', 'iter__', 'draw__'])
 
     # Extract chain, variable, x, and y indices from the parameter string
     pattern = r"([1-9]+)?\.?([a-zA-Z0-9_\.]+)\[([0-9]+),([0-9]+)"
@@ -312,5 +312,87 @@ def draws_to_statistics(draws, false_positive_rate, test_composition_above_logit
 
      # Return the result
     return summary[relevant_cols]
+
+def get_variability_contrast_draws(data, contrasts=None):
+    """
+    Extract variability contrast draws from data.
+
+    Parameters:
+        data (dict): Input data containing attributes and model fits.
+        contrasts (list or None): List of contrast expressions to apply.
+
+    Returns:
+        pd.DataFrame: A DataFrame with variability contrast draws.
+    """
+    # Extract attributes
+    cell_group = data.get("cell_group")
+    model_input = data.get("model_input")
+    fit = data.get("fit")
+
+    # Variability factors
+    variability_factor_of_interest = model_input.get("XA").columns if "XA" in model_input else []
+
+    # Get initial draws
+    draws = draws_to_tibble_x_y(fit, "alpha_normalised", "C", "M")
+    draws["value"] = -draws["value"]  # Invert values for variability
+
+    # Pivot wider and rename columns
+    draws = draws.pivot(index=["M", "chain__", "iter__", "draw__"], columns="C", values="value")
+    draws.columns = variability_factor_of_interest  # Rename columns
+    draws = draws.reset_index().drop(columns=["variable"], errors="ignore") 
+
+    # Apply contrasts if provided
+    if contrasts:
+        draws = mutate_from_expr_list(draws, contrasts, ignore_errors=True)
+
+    # Add cell group names
+    cell_names = pd.DataFrame({
+        "M": range(1, len(model_input["y"].columns) + 1),
+        cell_group: model_input["y"].columns
+    })
+    draws = draws.merge(cell_names, on="M", how="left")
+    draws = draws[[cell_group] + [col for col in draws.columns if col != cell_group]]
+
+    # If no contrasts of interest, return minimal output
+    if draws.shape[1] == 5:  # Includes M and cell_group
+        draws.drop_duplicates(subset=["M", cell_group])
+
+    # Get convergence
+    convergence_df = summary_to_tibble(fit, "alpha_normalised", "C", "M")
+
+    # Add cell names to convergence_df
+    convergence_df = convergence_df.merge(cell_names, on="M", how="left")
+
+    # Add factor names to convergence_df
+    factor_names = pd.DataFrame({
+        "C": range(1, len(variability_factor_of_interest) + 1),
+        "parameter": variability_factor_of_interest
+    })
+    convergence_df = convergence_df.merge(factor_names, on="C", how="left")
+
+    # Rename convergence columns
+    if "R_hat" in convergence_df.columns:
+        convergence_df.rename(columns={"R_hat": "R_k_hat"}, inplace=True)
+    elif "k_hat" in convergence_df.columns:
+        convergence_df.rename(columns={"k_hat": "R_k_hat"}, inplace=True)
+
+    convergence_df = convergence_df[[cell_group, "parameter", "N_Eff", "R_k_hat"]].dropna()
+
+    # Reshape draws to long format
+    draws_long = draws.melt(
+       id_vars=["M", "chain__", "iter__", "draw__", cell_group],
+       var_name="parameter",
+       value_name="value"
+    )
+
+    # Attach convergence
+    draws_long = draws_long.merge(convergence_df, on=[cell_group, "parameter"], how="left")
+
+    # Reorder parameters
+    parameter_order = draws.columns[5:]  # Columns beyond first 5 are parameters
+    draws_long["parameter"] = pd.Categorical(draws_long["parameter"], categories=parameter_order, ordered=True)
+    draws_long = draws_long.sort_values(["parameter", 'M'])
+
+    return draws_long
 
 
