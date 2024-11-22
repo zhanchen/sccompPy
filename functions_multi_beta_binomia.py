@@ -112,6 +112,15 @@ def sccomp_glm_data_frame_counts(
     data_for_model['truncation_not_idx_minimal'] = np.empty((0, 2))
     data_for_model['TNIM'] = 0
 
+    factor_parameter_dictionary = []
+    for term, slice_obj in X_composition.design_info.term_slices.items():
+        term_columns =  X_composition.design_info.column_names[slice_obj]
+        factor_parameter_dictionary.extend([(col, term.factors[0].name()) for col in term_columns])
+
+    factor_parameter_dictionary = pd.DataFrame(factor_parameter_dictionary, columns=["design_matrix_col", "factor"])
+        
+    # data_for_model['factor_parameter_dictionary'] = factor_parameter_dictionary
+
     # intercept
     data_for_model['intercept_in_design'] = data_for_model['X'].iloc[:,0].unique().tolist() == [1]
 
@@ -147,6 +156,9 @@ def sccomp_glm_data_frame_counts(
         show_console=True
     )
 
+    # move it here for debug
+    data_for_model['factor_parameter_dictionary'] = factor_parameter_dictionary
+
     output = {
         'fit': fit,
         'model_input': data_for_model,
@@ -158,4 +170,22 @@ def sccomp_glm_data_frame_counts(
         'formula_variability': formula_variability
     }
 
+    return output
+
+
+def get_mean_precision_association(fit):
+    # Extract the summary DataFrame
+    summary_df = fit.summary()
+    
+    # Filter rows whose index starts with "prec_coeff"
+    prec_coeff_values = summary_df[summary_df.index.str.startswith("prec_coeff")].Mean
+        
+    # Filter rows whose index starts with "prec_sd"
+    prec_sd_values = summary_df[summary_df.index.str.startswith("prec_sd")].Mean
+
+    output = {
+        'prec_coeff': prec_coeff_values,
+        'prec_sd' : prec_sd_values
+    }
+        
     return output
