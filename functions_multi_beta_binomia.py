@@ -12,13 +12,27 @@ def sccomp_glm_data_frame_counts(
     count = 'count',
 
     # Secondary arguments, will fill more
-    truncation_ajustment = 1.1,
-    inference_method = "variational",
-    bimodal_mean_variability_association = False,
-    use_data = True,
-    prior_mean = dict(intercept = [0,1], coefficients = [0,1]),                    
+    contrasts=None,
+    prior_mean = dict(intercept = [0,1], coefficients = [0,1]),     
     prior_overdispersion_mean_association = dict(intercept = [5, 2], slope = [0,  0.6], standard_deviation = [20, 40]),
-    exclude_priors = False
+    percent_false_positive=5,
+    # check_outliers = True, # not completed yet
+    variational_inference = None,
+    inference_method = "variational",
+    truncation_ajustment = 1.1,
+    test_composition_above_logit_fold_change = 0.1,
+    sample_cell_group_pairs_to_exclude = None,
+    output_directory = "sccomp_draws_files",
+    verbose = False,
+    exclude_priors = False,
+    bimodal_mean_variability_association = False,
+    enable_loo = False,  
+    use_data = True,
+    cores = 4,
+    mcmc_seed = None,
+    max_sampling_iterations=20000,
+    pass_fit=True,
+    **kwargs
 ):
     
     # fill complete formula to include count as a variable prefix.
@@ -99,7 +113,7 @@ def sccomp_glm_data_frame_counts(
 
     # subject to change
     data_for_model['grainsize'] = 1
-    data_for_model['enable_loo'] = False
+    data_for_model['enable_loo'] = enable_loo
     data_for_model['is_truncated'] = 0
 
     data_for_model['truncation_up'] = pd.DataFrame(-1, index=data[sample].unique(), columns=data[cell_group].unique())
@@ -150,10 +164,22 @@ def sccomp_glm_data_frame_counts(
     # Compile Stan model
     stan_model = cmdstanpy.CmdStanModel(stan_file='./stan/glm_multi_beta_binomial.stan')
 
+    # Credible interval
+    CI = 1 - (percent_false_positive / 100)
+    if mcmc_seed is None:
+        mcmc_seed = np.random.randint(0, int(1e5))
+
     # Run Stan model sampling
     fit = stan_model.sample(
         data=data_for_model,
-        show_console=True
+        chains = cores,
+        # quantile=CI, didnt find matching args
+        # inference_method=inference_method,
+        output_dir=output_directory,
+        seed=mcmc_seed,
+        # max_sampling_iterations=max_sampling_iterations,
+        # pars=["beta", "alpha", "prec_coeff", "prec_sd", "alpha_normalised", "random_effect", "random_effect_2", "log_lik"],
+        show_console=verbose
     )
 
     # move it here for debug
