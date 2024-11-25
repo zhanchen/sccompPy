@@ -1,0 +1,15 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.py
+sccompPy/__init__.py
+sccompPy/functions_multi_beta_binomia.py
+sccompPy/methods.py
+sccompPy/utilities.py
+sccompPy.egg-info/PKG-INFO
+sccompPy.egg-info/SOURCES.txt
+sccompPy.egg-info/dependency_links.txt
+sccompPy.egg-info/requires.txt
+sccompPy.egg-info/top_level.txt
+sccompPy/data/count_obj.csv
+sccompPy/stan/glm_multi_beta_binomial.stan

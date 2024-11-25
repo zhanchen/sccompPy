@@ -1,0 +1,4 @@
+include sccompPy/data/*
+include sccompPy/stan/*.stan
+include README.md
+include LICENSE

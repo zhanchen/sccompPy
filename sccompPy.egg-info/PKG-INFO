@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: sccompPy
+Version: 0.1.0
+Summary: A Python package for sccomp - Tests differences in cell type proportions and variability from single-cell data
+Home-page: https://github.com/MangiolaLaboratory/sccompPy
+Author: Chen Zhan
+Author-email: chen.zhan@adelaide.edu.au
+License: GPLv3
+Description: # sccompPy
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Provides-Extra: dev
+License-File: LICENSE
