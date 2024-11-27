@@ -20,7 +20,7 @@ def sccomp_glm_data_frame_counts(
     percent_false_positive=5,
     # check_outliers = True, # not completed yet
     variational_inference = None,
-    inference_method = "variational",
+    inference_method = "hmc",
     truncation_ajustment = 1.1,
     test_composition_above_logit_fold_change = 0.1,
     sample_cell_group_pairs_to_exclude = None,
@@ -41,17 +41,20 @@ def sccomp_glm_data_frame_counts(
     formula_composition = f"{count} {formula_composition}"
     formula_variability = f"{count} {formula_variability}"
 
+    sample_list = data[sample].unique().tolist()
+    cell_group_list = data[cell_group].unique().tolist()
+
     # Initialize dictionary to hold data for Stan model
     data_for_model = {}
 
     # N: Total number of unique samples
-    data_for_model['N'] = data[sample].nunique()
+    data_for_model['N'] = len(sample_list)
 
     # M: Total number of unique cell groups
-    data_for_model['M'] = data[cell_group].nunique()
+    data_for_model['M'] = len(cell_group_list)
 
     # exposure: Calculate exposure as the sum of counts for each sample
-    data_for_model['exposure'] = np.array(data.groupby(sample)[count].sum())
+    data_for_model['exposure'] = np.array(data.groupby(sample)[count].sum()[sample_list])
 
     # is_proportion: Boolean flag to indicate if data represents proportions
     data_for_model['is_proportion'] = data[count].max() <= 1
@@ -64,6 +67,7 @@ def sccomp_glm_data_frame_counts(
         values=count,          # Values in the table are from 'count' column
         fill_value=0             # Fill NaN values with 0
     )
+    y = y.loc[sample_list,cell_group_list]
 
     if data_for_model['is_proportion']:
         y_proportion = y
@@ -82,7 +86,7 @@ def sccomp_glm_data_frame_counts(
     tmp_data_composition.drop_duplicates(inplace=True)
     tmp_data_composition.set_index(sample, inplace=True)
 
-    data_for_model['X'] = tmp_data_composition
+    data_for_model['X'] = tmp_data_composition.loc[sample_list]
 
     # Xa and XA
     y_variability, X_variability = dmatrices(formula_variability, data)
@@ -91,7 +95,7 @@ def sccomp_glm_data_frame_counts(
     tmp_data_variability.drop_duplicates(inplace=True)
     tmp_data_variability.set_index(sample, inplace=True)
 
-    data_for_model['Xa'] = tmp_data_variability
+    data_for_model['Xa'] = tmp_data_variability.loc[sample_list]
     data_for_model['XA'] = tmp_data_variability.drop_duplicates().reset_index(drop=True)
 
     data_for_model['C'] = data_for_model['X'].shape[1]
@@ -143,13 +147,14 @@ def sccomp_glm_data_frame_counts(
     if data_for_model['intercept_in_design'] or X_variability.design_info.term_names == [] or X_variability.design_info.term_names == ['Intercept']:
         data_for_model['A_intercept_columns'] = 1
     else:
-        data_for_model['A_intercept_columns'] = data[[col for col in X_composition.design_info.term_names if col in data.columns]].drop_duplicates().shape[0]
-
+        # data_for_model['A_intercept_columns'] = data[[col for col in X_composition.design_info.term_names if col in data.columns]].drop_duplicates().shape[0]
+        data_for_model['A_intercept_columns'] = len(next(iter(X_composition.design_info.factor_infos.items()))[1].categories)
     if data_for_model['intercept_in_design']:
         data_for_model['B_intercept_columns'] = 1
     else:
-        data_for_model['B_intercept_columns'] = data[[col for col in X_composition.design_info.term_names if col in data.columns]].drop_duplicates().shape[0]
-    
+        # data_for_model['B_intercept_columns'] = data[[col for col in X_composition.design_info.term_names if col in data.columns]].drop_duplicates().shape[0]
+        data_for_model['B_intercept_columns'] = len(next(iter(X_composition.design_info.factor_infos.items()))[1].categories)
+        
     # check this later
     data_for_model['user_forced_truncation_not_idx'] = list(range(1, data.shape[0]+1))
 

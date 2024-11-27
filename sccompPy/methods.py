@@ -78,7 +78,7 @@ def sccomp_estimate(
 
 
 
-def sccomp_test(data, contrasts=None, percent_false_positive=5, test_composition_above_logit_fold_change=0.1, pass_fit=True):
+def sccomp_test(data, contrasts=None, percent_false_positive=5, test_composition_above_logit_fold_change=0.1, return_all = False):
     # Extract attributes
     fit = data.get('fit')
     sample = data.get("sample")
@@ -147,6 +147,7 @@ def sccomp_test(data, contrasts=None, percent_false_positive=5, test_composition
 
     output = {
         'result': result,
+        'fit': fit,
         'mean_concentration_association': get_mean_precision_association(fit),
         'test_composition_above_logit_fold_change': test_composition_above_logit_fold_change,
         'model_input': model_input,
@@ -159,7 +160,7 @@ def sccomp_test(data, contrasts=None, percent_false_positive=5, test_composition
         'formula_variability': formula_variability
     }
 
-    if pass_fit:
-        output['fit'] = fit
-
-    return output
+    if return_all:
+        return output
+    else:
+        return result

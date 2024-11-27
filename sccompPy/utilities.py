@@ -103,11 +103,18 @@ def mutate_from_expr_list(x, formula_expr, ignore_errors = True):
 
     # Process contrast elements by removing fractions, decimals, and splitting expressions
     def clean_contrast_elements(expr):
-        expr = re.sub(r"[0-9]+/[0-9]+\s?\*", "", expr)  # Remove fractions
-        expr = re.sub(r"[-+]?[0-9]+\.[0-9]+\s?\*", "", expr)  # Remove decimals
-        elements = re.split(r"[+\-*]", expr)  # Split by operators
+
+        expr = re.sub(r"[0-9]+/[0-9]+\s?\*", "", expr)  # Remove fractions (e.g., "3/4 *")
+        expr = re.sub(r"[-+]?[0-9]+\.[0-9]+\s?\*", "", expr)  # Remove decimals (e.g., "1.5 *")
+        elements = re.split(r"[+\-/*]", expr)  # Split by operators
         elements = [re.sub(r"[\(\)\s]", "", e) for e in elements]  # Remove parentheses and spaces
-        return elements
+
+        # Remove elements that are purely numbers (integers, fractions, or decimals)
+        filtered_elements = [
+            e for e in elements 
+            if not re.match(r"^[-+]?[0-9]+(\.[0-9]+)?(/[0-9]+)?$", e)
+        ]
+        return filtered_elements
 
     contrast_elements = reduce(lambda a, b: a + b, [clean_contrast_elements(f) for f in formula_expr.values()], [])
 
@@ -115,7 +122,7 @@ def mutate_from_expr_list(x, formula_expr, ignore_errors = True):
     def requires_backquotes(element):
         return not re.match(r"^[a-zA-Z0-9_]+$", element)  # Only valid chars for column names
 
-    invalid_contrasts = [e for e in contrast_elements if requires_backquotes(e) and e not in parameter_names]
+    invalid_contrasts = [e for e in contrast_elements if requires_backquotes(e) or e not in parameter_names]
     if invalid_contrasts:
         print(f"Warning: These elements require backquotes: {invalid_contrasts}, sccompPy will auto quote them.")
 
