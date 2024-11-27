@@ -19,11 +19,11 @@ Here is a demo of installation in editable mode
     Requirement already satisfied: numpy>=1.18.0 in /home/chzhan1/.local/lib/python3.9/site-packages (from sccompPy==0.1.0) (1.26.4)
     Requirement already satisfied: patsy>=0.5.0 in /home/chzhan1/.local/lib/python3.9/site-packages (from sccompPy==0.1.0) (0.5.6)
     Requirement already satisfied: cmdstanpy>=1.0.0 in /home/chzhan1/.local/lib/python3.9/site-packages (from sccompPy==0.1.0) (1.2.4)
-    Requirement already satisfied: tqdm in /home/chzhan1/.local/lib/python3.9/site-packages (from cmdstanpy>=1.0.0->sccompPy==0.1.0) (4.66.2)
     Requirement already satisfied: stanio<2.0.0,>=0.4.0 in /home/chzhan1/.local/lib/python3.9/site-packages (from cmdstanpy>=1.0.0->sccompPy==0.1.0) (0.5.1)
+    Requirement already satisfied: tqdm in /home/chzhan1/.local/lib/python3.9/site-packages (from cmdstanpy>=1.0.0->sccompPy==0.1.0) (4.66.2)
     Requirement already satisfied: tzdata>=2022.7 in /home/chzhan1/.local/lib/python3.9/site-packages (from pandas>=1.0.0->sccompPy==0.1.0) (2024.1)
-    Requirement already satisfied: pytz>=2020.1 in /home/chzhan1/.local/lib/python3.9/site-packages (from pandas>=1.0.0->sccompPy==0.1.0) (2024.1)
     Requirement already satisfied: python-dateutil>=2.8.2 in /home/chzhan1/.local/lib/python3.9/site-packages (from pandas>=1.0.0->sccompPy==0.1.0) (2.9.0.post0)
+    Requirement already satisfied: pytz>=2020.1 in /home/chzhan1/.local/lib/python3.9/site-packages (from pandas>=1.0.0->sccompPy==0.1.0) (2024.1)
     Requirement already satisfied: six in /home/chzhan1/.local/lib/python3.9/site-packages (from patsy>=0.5.0->sccompPy==0.1.0) (1.16.0)
     Installing collected packages: sccompPy
       Attempting uninstall: sccompPy
@@ -41,7 +41,7 @@ Here is a demo of installation in editable mode
       Running setup.py develop for sccompPy
     Successfully installed sccompPy-0.1.0
     Note: you may need to restart the kernel to use updated packages.
-    
+
 
 ## Import `sccompy` package 
 
@@ -213,8 +213,8 @@ estimate_res = sccompPy.sccomp_estimate(
 )
 ```
 
-    17:23:36 - cmdstanpy - INFO - CmdStan start processing
-    
+    16:22:09 - cmdstanpy - INFO - CmdStan start processing
+
 
 
     chain 1 |          | 00:00 Status
@@ -234,17 +234,19 @@ estimate_res = sccompPy.sccomp_estimate(
 
                                                                                                                                                                                                                                                                                                                                     
 
-    17:23:45 - cmdstanpy - INFO - CmdStan done processing.
-    17:23:45 - cmdstanpy - WARNING - Non-fatal error during sampling:
+    16:22:18 - cmdstanpy - INFO - CmdStan done processing.
+    16:22:18 - cmdstanpy - WARNING - Non-fatal error during sampling:
     Exception: Exception: beta_binomial_lpmf: First prior sample size parameter[1] is inf, but must be positive finite! (in 'glm_multi_beta_binomial.stan', line 214, column 16 to line 219, column 19) (in 'glm_multi_beta_binomial.stan', line 653, column 3 to line 683, column 8)
     Exception: Exception: beta_binomial_lpmf: First prior sample size parameter[1] is inf, but must be positive finite! (in 'glm_multi_beta_binomial.stan', line 214, column 16 to line 219, column 19) (in 'glm_multi_beta_binomial.stan', line 653, column 3 to line 683, column 8)
-    Exception: Exception: beta_binomial_lpmf: Second prior sample size parameter[5] is 0, but must be positive finite! (in 'glm_multi_beta_binomial.stan', line 214, column 16 to line 219, column 19) (in 'glm_multi_beta_binomial.stan', line 653, column 3 to line 683, column 8)
     Exception: Exception: beta_binomial_lpmf: First prior sample size parameter[1] is inf, but must be positive finite! (in 'glm_multi_beta_binomial.stan', line 214, column 16 to line 219, column 19) (in 'glm_multi_beta_binomial.stan', line 653, column 3 to line 683, column 8)
+    Exception: gamma_lpdf: Random variable is inf, but must be positive finite! (in 'glm_multi_beta_binomial.stan', line 753, column 2 to column 53)
+    	Exception: gamma_lpdf: Random variable is inf, but must be positive finite! (in 'glm_multi_beta_binomial.stan', line 753, column 2 to column 53)
+    	Exception: Exception: beta_binomial_lpmf: First prior sample size parameter[1] is inf, but must be positive finite! (in 'glm_multi_beta_binomial.stan', line 214, column 16 to line 219, column 19) (in 'glm_multi_beta_binomial.stan', line 653, column 3 to line 683, column 8)
     Consider re-running with show_console=True if the above output is unclear!
-    
+
 
     
-    
+
 
 
 ```python
@@ -266,19 +268,20 @@ test_res = sccompPy.sccomp_test(estimate_res, contrasts= ['type[cancer] - type[b
 ```
 
     Warning: These elements require backquotes: ['type[cancer]', 'type[benign]'], sccompPy will auto quote them.
-    
+    Warning: These elements require backquotes: ['type[cancer]', 'type[benign]'], sccompPy will auto quote them.
 
-    /home/chzhan1/Python/SAiGENCI/sccompPy/sccompPy/utilities.py:288: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+
+    /home/chzhan1/Python/SAiGENCI/sccompPy/sccompPy/utilities.py:295: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
       grouped = draws.groupby([cell_group, 'M', 'parameter'])
-    /home/chzhan1/Python/SAiGENCI/sccompPy/sccompPy/utilities.py:305: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+    /home/chzhan1/Python/SAiGENCI/sccompPy/sccompPy/utilities.py:312: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
       summary["FDR"] = summary.groupby("parameter")[f"{prefix}pH0"].transform(lambda pH0: get_FDR(pH0))
-    
+
 
 ### `sccomp_test` returns a `dict` where the first element - *result* contains the result table
 
 
 ```python
-test_res['result']
+test_res
 ```
 
 
@@ -325,13 +328,13 @@ test_res['result']
       <th>0</th>
       <td>B1</td>
       <td>type[benign]</td>
-      <td>0.885494</td>
-      <td>1.147990</td>
-      <td>1.386073</td>
+      <td>0.900753</td>
+      <td>1.155635</td>
+      <td>1.386001</td>
       <td>0.00000</td>
       <td>0.000000</td>
-      <td>4636.410</td>
-      <td>0.999638</td>
+      <td>4821.08</td>
+      <td>0.999812</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -344,13 +347,13 @@ test_res['result']
       <th>1</th>
       <td>B1</td>
       <td>type[cancer]</td>
-      <td>0.149581</td>
-      <td>0.495901</td>
-      <td>0.817201</td>
-      <td>0.01325</td>
-      <td>0.000990</td>
-      <td>6088.560</td>
-      <td>0.999419</td>
+      <td>0.150861</td>
+      <td>0.494823</td>
+      <td>0.798735</td>
+      <td>0.01475</td>
+      <td>0.001500</td>
+      <td>5975.15</td>
+      <td>0.999897</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -363,11 +366,11 @@ test_res['result']
       <th>2</th>
       <td>B1</td>
       <td>type[cancer] - type[benign]</td>
-      <td>-1.056506</td>
-      <td>-0.654636</td>
-      <td>-0.234130</td>
-      <td>0.00675</td>
-      <td>0.001275</td>
+      <td>-1.065256</td>
+      <td>-0.663332</td>
+      <td>-0.288341</td>
+      <td>0.00325</td>
+      <td>0.001000</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -382,13 +385,13 @@ test_res['result']
       <th>3</th>
       <td>B2</td>
       <td>type[benign]</td>
-      <td>0.393509</td>
-      <td>0.729689</td>
-      <td>1.017565</td>
-      <td>0.00025</td>
-      <td>0.000024</td>
-      <td>5653.390</td>
-      <td>0.999175</td>
+      <td>0.412158</td>
+      <td>0.724773</td>
+      <td>1.017911</td>
+      <td>0.00050</td>
+      <td>0.000036</td>
+      <td>7054.69</td>
+      <td>0.999426</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -401,13 +404,13 @@ test_res['result']
       <th>4</th>
       <td>B2</td>
       <td>type[cancer]</td>
-      <td>-0.426521</td>
-      <td>0.028897</td>
-      <td>0.444366</td>
-      <td>0.63525</td>
-      <td>0.087956</td>
-      <td>4994.700</td>
-      <td>0.999616</td>
+      <td>-0.411091</td>
+      <td>0.028000</td>
+      <td>0.418074</td>
+      <td>0.63900</td>
+      <td>0.087287</td>
+      <td>7181.51</td>
+      <td>0.999822</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -439,13 +442,13 @@ test_res['result']
       <th>103</th>
       <td>TM2</td>
       <td>type[cancer]</td>
-      <td>-1.220657</td>
-      <td>-0.906117</td>
-      <td>-0.590917</td>
+      <td>-1.214596</td>
+      <td>-0.892860</td>
+      <td>-0.598306</td>
       <td>0.00000</td>
       <td>0.000000</td>
-      <td>3886.600</td>
-      <td>0.999885</td>
+      <td>5793.83</td>
+      <td>0.999928</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -458,11 +461,11 @@ test_res['result']
       <th>104</th>
       <td>TM2</td>
       <td>type[cancer] - type[benign]</td>
-      <td>-0.169545</td>
-      <td>0.274726</td>
-      <td>0.722179</td>
-      <td>0.23100</td>
-      <td>0.055646</td>
+      <td>-0.167554</td>
+      <td>0.276814</td>
+      <td>0.717797</td>
+      <td>0.20400</td>
+      <td>0.053104</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -477,13 +480,13 @@ test_res['result']
       <th>105</th>
       <td>TM3</td>
       <td>type[benign]</td>
-      <td>-1.706025</td>
-      <td>-0.801815</td>
-      <td>0.287057</td>
-      <td>0.09700</td>
-      <td>0.012589</td>
-      <td>913.663</td>
-      <td>0.999229</td>
+      <td>-1.764759</td>
+      <td>-0.827435</td>
+      <td>0.264891</td>
+      <td>0.09350</td>
+      <td>0.015492</td>
+      <td>1817.40</td>
+      <td>1.000410</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -496,13 +499,13 @@ test_res['result']
       <th>106</th>
       <td>TM3</td>
       <td>type[cancer]</td>
-      <td>-3.921500</td>
-      <td>-2.679785</td>
-      <td>-1.412898</td>
+      <td>-3.906174</td>
+      <td>-2.667245</td>
+      <td>-1.388576</td>
       <td>0.00000</td>
       <td>0.000000</td>
-      <td>738.823</td>
-      <td>1.000240</td>
+      <td>1453.44</td>
+      <td>0.999974</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -515,11 +518,11 @@ test_res['result']
       <th>107</th>
       <td>TM3</td>
       <td>type[cancer] - type[benign]</td>
-      <td>-3.132293</td>
-      <td>-1.870932</td>
-      <td>-0.752256</td>
-      <td>0.00100</td>
-      <td>0.000375</td>
+      <td>-3.109568</td>
+      <td>-1.838550</td>
+      <td>-0.743080</td>
+      <td>0.00050</td>
+      <td>0.000200</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
