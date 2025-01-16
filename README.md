@@ -1,5 +1,5 @@
 # `sccompPy`(Beta) - A Python package for sccomp 
-## - Tests differences in cell type proportions and variability from single-cell data
+## Tests differences in cell type proportions and variability from single-cell data
 
 Cellular omics such as single-cell genomics, proteomics, and microbiomics allow the characterization of tissue and microbial community composition, which can be compared between conditions to identify biological drivers. This strategy has been critical to unveiling markers of disease progression in conditions such as cancer and pathogen infections.
 
