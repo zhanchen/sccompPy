@@ -1,4 +1,6 @@
-# A Python package for sccomp - Tests differences in cell type proportions and variability from single-cell data
+# `sccompPy`(Beta) - A Python package for sccomp 
+## - Tests differences in cell type proportions and variability from single-cell data
+
 Cellular omics such as single-cell genomics, proteomics, and microbiomics allow the characterization of tissue and microbial community composition, which can be compared between conditions to identify biological drivers. This strategy has been critical to unveiling markers of disease progression in conditions such as cancer and pathogen infections.
 
 For cellular omic data, no method for differential variability analysis exists, and methods for differential composition analysis only take a few fundamental data properties into account. Here we introduce sccomp, a generalised method for differential composition and variability analyses capable of jointly modelling data count distribution, compositionality, group-specific variability, and proportion mean-variability association, while being robust to outliers.
@@ -15,23 +17,24 @@ Mangiola, Stefano, Alexandra J. Roth-Schulze, Marie Trussart, Enrique Zozaya-Val
 ### Github
 
 
-```python
+```bash
 pip install git+https://github.com/MangiolaLaboratory/sccompPy.git
 ```
 
 ### Prerequisites: CmdStanPy Installation
 
-`sccompPy` relies on **CmdStanPy**, which serves as an interface to the latest version of **CmdStan**, a powerful tool for Bayesian modeling.
+`sccompPy` relies on **CmdStanPy**, which serves as an interface to the latest version of **CmdStan**, a powerful tool for Bayesian modelling.
 
 To ensure compatibility, please install and configure **CmdStanPy** before using `sccompPy`. Follow the instructions on the [CmdStanPy documentation](https://mc-stan.org/cmdstanpy/) to install and set up the required dependencies.
 
-Here we provide a demo list some necesary steps:
+Here we provide a demo listing some necessary steps:
 
 
 
+```bash
+pip install --upgrade cmdstanpy
+```
 ```python
-!pip install --upgrade cmdstanpy
-
 import cmdstanpy
 cmdstanpy.install_cmdstan()
 ```
