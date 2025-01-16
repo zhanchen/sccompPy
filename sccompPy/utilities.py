@@ -66,6 +66,7 @@ def summary_to_tibble(fit, par, x, y = None, probs = (5, 25, 50, 75, 95)):
     prob_cols = [f"{p}%" for p in probs] 
     columns_to_keep = ["Mean"] + prob_cols + ['N_Eff', 'R_hat']
 
+    columns_to_keep = [col for col in columns_to_keep if col in filtered_summary.columns]
     filtered_summary = filtered_summary[columns_to_keep]
 
     # Reset the index and store the old index in a new column called 'variable'
