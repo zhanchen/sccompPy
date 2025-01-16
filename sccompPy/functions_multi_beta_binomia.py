@@ -134,8 +134,12 @@ def sccomp_glm_data_frame_counts(
 
     factor_parameter_dictionary = []
     for term, slice_obj in X_composition.design_info.term_slices.items():
-        term_columns =  X_composition.design_info.column_names[slice_obj]
-        factor_parameter_dictionary.extend([(col, term.factors[0].name()) for col in term_columns])
+        term_columns = X_composition.design_info.column_names[slice_obj]
+        if term.factors:  # Ensure factors exist
+            factor_name = term.factors[0].name()
+        else:
+            factor_name = 'Intercept'  # otherwise this is intercept
+        factor_parameter_dictionary.extend([(col, factor_name) for col in term_columns])
 
     factor_parameter_dictionary = pd.DataFrame(factor_parameter_dictionary, columns=["design_matrix_col", "factor"])
         

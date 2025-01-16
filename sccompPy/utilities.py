@@ -3,6 +3,15 @@ import re
 import numpy as np
 from functools import reduce
 
+# for plot
+from math import ceil, sqrt
+from plotnine import (
+    ggplot, aes, geom_vline, geom_errorbarh, geom_point, 
+    scale_color_brewer, labs, theme_minimal, theme, 
+    element_text, element_blank, element_line, facet_wrap,
+    scale_y_discrete
+)
+
 #' draws_to_tibble_x_y
 #'
 #'
@@ -402,5 +411,92 @@ def get_variability_contrast_draws(data, contrasts=None):
     draws_long = draws_long.sort_values(["parameter", 'M'])
 
     return draws_long
+
+
+def plot_1D_intervals(data, significance_threshold=0.05, test_composition_above_logit_fold_change=None):
+    """
+    Create 1D interval plots from nested data using plotnine.
+
+    Parameters:
+        data (pd.DataFrame): Input data with credible intervals and FDR information.
+        significance_threshold (float): Threshold for FDR significance.
+        test_composition_above_logit_fold_change (float): Logit fold change threshold.
+
+    Returns:
+        ggplot object: Combined plot.
+    """
+    if not type(data) == dict:
+        raise ValueError(
+            "sccomp says: to produce plots, you need to run the function sccomp_test() on your estimates and set arg return_all=True, e.g., sccompPy.sccomp_test(return_all=True)"
+        )
+
+    if test_composition_above_logit_fold_change is None:
+        test_composition_above_logit_fold_change = data.get("test_composition_above_logit_fold_change", 0.1)
+
+    cell_group = data.get('cell_group')
+    data = data.get('result')
+
+    # Check if FDR columns exist
+    if data is not None and not any(data.columns.str.endswith("FDR")):
+        raise ValueError("sccomp says: to produce plots, you need to run the function sccomp_test() on your estimates.")
+
+    # Filter and reshape data
+    reshaped_data = data[data["factor"] != "Intercept"].drop(
+        columns=[col for col in data.columns if "N_Eff" in col or "R_k_hat" in col], errors="ignore"
+    ).melt(
+        id_vars=[cell_group, "parameter", 'factor', 'FDR'],
+        value_vars=[col for col in data.columns if col.startswith("c_") or col.startswith("v_")],
+        var_name="which_temp", 
+        value_name="value"
+    ).assign(
+        which=lambda df: df["which_temp"].str.split("_").str[0],
+        estimate=lambda df: df["which_temp"].str.split("_").str[1]
+    ).drop(
+        columns = 'which_temp'
+    ).pivot(
+        index=[cell_group, "parameter", 'factor', 'FDR', "which"], columns="estimate", values="value"
+    ).reset_index()
+    reshaped_data.columns.name = None
+
+    reshaped_data = reshaped_data[~reshaped_data.effect.isna()]
+    if reshaped_data["factor"].isna().any():
+        reshaped_data = reshaped_data[reshaped_data["factor"].isna()] # factor is NaN means this is terms from contrast list
+    reshaped_data["FDR<signifcance_threshold"] = reshaped_data["FDR"] < significance_threshold
+
+    reshaped_data.sort_values(["parameter", "which", 'effect'], ascending=[True, True, True], inplace=True)
+    reshaped_data["unique_group"] = reshaped_data[cell_group] + "-_-" + reshaped_data["parameter"] + "-_-" + reshaped_data["which"]
+
+    reshaped_data.unique_group = pd.Categorical(
+        reshaped_data.unique_group,
+        categories=reshaped_data.unique_group,
+        ordered=True
+    )
+
+    p = (
+       ggplot(reshaped_data, aes(x="effect", y='unique_group')) +
+       geom_vline(xintercept=test_composition_above_logit_fold_change, color="grey", linetype="--") +
+       geom_vline(xintercept=-test_composition_above_logit_fold_change, color="grey", linetype="--") +
+       geom_errorbarh(aes(xmin="lower", xmax="upper", color="FDR<signifcance_threshold")) +
+       geom_point() +
+       scale_color_brewer(type='qual', palette='Set1') +
+       scale_y_discrete(labels = lambda labels: [label.split('-_-')[0] for label in labels]) + 
+       labs(
+           x="Credible interval of the slope",
+           y="Cell group",
+           title="1D Interval Plot"
+       ) +
+       theme_minimal() +
+       theme(
+           legend_position="bottom", 
+           axis_text_x=element_text(hjust=1),
+           panel_grid_major=element_blank(),  # Remove major grid lines
+           panel_grid_minor=element_blank(),   # Remove minor grid lines
+           axis_line_x=element_line(size=0.5),       # Show x-axis line
+           axis_line_y=element_line(size=0.5)        # Show y-axis line
+       ) +
+       facet_wrap("~parameter + which", scales="free_y")
+    )
+
+    return(p)
 
 

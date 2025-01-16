@@ -26,6 +26,7 @@ setup(
     install_requires=[
         "pandas>=1.0.0",        # For data manipulation
         "numpy>=1.18.0",        # For numerical computations
+        'plotnine>=0.14.0',      # For plots
         "patsy>=0.5.0",         # For creating design matrices
         "cmdstanpy>=1.0.0",     # For Stan models
     ],

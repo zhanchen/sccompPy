@@ -1,6 +1,7 @@
 pandas>=1.0.0
 numpy>=1.18.0
 patsy>=0.5.0
+plotnine>=0.14.0
 cmdstanpy>=1.0.0
 
 [dev]

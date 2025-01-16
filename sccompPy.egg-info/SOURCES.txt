@@ -1,6 +1,9 @@
+.gitignore
 LICENSE
 MANIFEST.in
+README.ipynb
 README.md
+dev_note.ipynb
 setup.py
 sccompPy/__init__.py
 sccompPy/functions_multi_beta_binomia.py
@@ -11,5 +14,11 @@ sccompPy.egg-info/SOURCES.txt
 sccompPy.egg-info/dependency_links.txt
 sccompPy.egg-info/requires.txt
 sccompPy.egg-info/top_level.txt
+sccompPy/__pycache__/__init__.cpython-39.pyc
+sccompPy/__pycache__/functions_multi_beta_binomia.cpython-39.pyc
+sccompPy/__pycache__/methods.cpython-39.pyc
+sccompPy/__pycache__/sccomp_glm_data_frame_counts.cpython-39.pyc
+sccompPy/__pycache__/utilities.cpython-39.pyc
 sccompPy/data/count_obj.csv
+sccompPy/stan/glm_multi_beta_binomial
 sccompPy/stan/glm_multi_beta_binomial.stan
