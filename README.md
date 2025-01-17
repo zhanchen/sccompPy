@@ -20,7 +20,7 @@ proportion mean-variability association, while being robust to outliers.
 simulation and cross-study knowledge transfer. We demonstrate that
 mean-variability association is ubiquitous across technologies,
 highlighting the inadequacy of the very popular Dirichlet-multinomial
-modeling and providing essential principles for differential variability
+modelling and providing essential principles for differential variability
 analysis.
 
 <img src="README_files/cartoon_methods.jpg" width="100%"/>
@@ -79,6 +79,9 @@ factors, and capable of random-effect/intercept modelling.
 - Testing differential variability
 - Probabilistic outlier identification
 - Cross-dataset learning (hyperpriors).
+
+## Development notes:
+The capability of random-effect modelling for `sccompPy` package is under-development.
 
 ## Installation
 ### Github
