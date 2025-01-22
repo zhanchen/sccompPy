@@ -23,7 +23,7 @@ highlighting the inadequacy of the very popular Dirichlet-multinomial
 modelling and providing essential principles for differential variability
 analysis.
 
-<img src="README_files/cartoon_methods.jpg" width="100%"/>
+<img src="README_files/cartoon_methods.png" width="100%"/>
 
 ### Comparison with other methods
 
